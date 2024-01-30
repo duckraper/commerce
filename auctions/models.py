@@ -1,6 +1,46 @@
+from email.policy import default
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from datetime import datetime
 
 
 class User(AbstractUser):
     pass
+
+
+class ListingCategory(models.Model):
+    name = models.CharField(max_length=32)
+
+    def __str__(self):
+        return self.name
+
+
+class AuctionListing(models.Model):
+    name = models.CharField(max_length=64)
+    description = models.TextField()
+    image = models.URLField(blank=True)
+    category = models.ForeignKey(
+        ListingCategory, on_delete=models.PROTECT, related_name='listings')
+    date = models.DateTimeField(default=datetime.now)
+    current_price = models.DecimalField(
+        max_digits=10, decimal_places=2, null=False)
+    opened = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"{self.name}: ${self.current_price}"
+
+
+class Bid(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='bids')
+    auction_listing = models.ForeignKey(
+        AuctionListing, on_delete=models.CASCADE, related_name='bids')
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
+    date = models.DateTimeField(default=datetime.now)
+
+class Comment(models.Model):
+    content = models.TextField()
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments')
+    auction_listing = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='comments')

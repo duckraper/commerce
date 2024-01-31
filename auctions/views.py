@@ -3,12 +3,16 @@ from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
+from .models import AuctionListing, ListingCategory
 
 from .models import User
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html", {
+        'listings': AuctionListing.objects.all().filter(opened=True),
+    })
 
 
 def login_view(request):
@@ -51,7 +55,8 @@ def register(request):
 
         # Attempt to create new user
         try:
-            user = User.objects.create_user(username, email, password)
+            user = User.objects.create_user(  # type: ignore
+                username, email, password)
             user.save()
         except IntegrityError:
             return render(request, "auctions/register.html", {
@@ -61,3 +66,51 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+
+@login_required(login_url='login')
+def create_listing(request):
+    categories = ListingCategory.objects.all()
+    
+    if request.method == "POST":
+        name = request.POST['name']
+        description = request.POST['description']
+        image = request.POST['image']
+        category = ListingCategory.objects.get(name=request.POST['category'])
+        price = request.POST['starting-bid']
+
+        if not name or not image or not category or not price:
+            return render(request, 'auctions/create.html', {
+                'required_fields': True,
+                'message': 'Name and starting bid are required.',
+                'categories': categories,
+            })
+        
+        try:
+            listing = AuctionListing.objects.create(
+                name=name,
+                description=description,
+                image=image,
+                category=category,
+                current_price=price,
+            )
+            listing.save()
+            return HttpResponseRedirect(reverse('index'))
+        except IntegrityError:
+            return render(request, 'auctions/create.html', {
+                'required_fields': False,
+                'message': 'Name already taken,',
+                'categories': categories,
+            })
+
+    return render(request, 'auctions/create.html', {
+        'required_fields': False,
+        'categories': categories,
+    })
+
+
+def show_listing(request, id):
+    return render(request, 'auctions/listing.html', {
+        'listing': AuctionListing.objects.get(pk=id),
+
+    })

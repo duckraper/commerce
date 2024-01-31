@@ -5,10 +5,10 @@
     <h2>Register</h2>
 
     {% if message %}
-        <div>{{ message }}</div>
+        <p>{{ message }}</p>
     {% endif %}
 
-    <form action="{% url 'register' %}" method="post">
+    <form action="{% url 'create' %}" method="post">
         {% csrf_token %}
         <div class="form-group">
             <input class="form-control" autofocus type="text" name="username" placeholder="Username">

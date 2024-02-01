@@ -12,11 +12,11 @@ class ListingCategory(models.Model):
 
 
 class AuctionListing(models.Model):
-    name = models.CharField(max_length=64)
-    description = models.TextField(null=True)
-    image = models.URLField(blank=True)
+    name = models.CharField(max_length=64) # varchar(64)
+    description = models.TextField(null=True) #Text
+    image = models.URLField(blank=True) #Url
     category = models.ForeignKey(
-        ListingCategory, on_delete=models.PROTECT, related_name='listings')
+        ListingCategory, on_delete=models.PROTECT, related_name='listings') #FK references ListingCategory
     date = models.DateTimeField(default=datetime.now)
     current_price = models.DecimalField(
         max_digits=10, decimal_places=2, null=False)

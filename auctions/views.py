@@ -109,8 +109,14 @@ def create_listing(request):
     })
 
 
-def show_listing(request, id):
-    return render(request, 'auctions/listing.html', {
-        'listing': AuctionListing.objects.get(pk=id),
+def show_listing(request, listing_id):
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
 
+    return render(request, 'auctions/listing.html', {
+        'listing': listing,
     })

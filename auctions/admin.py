@@ -12,6 +12,7 @@ class AuctionListingAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     filter_horizontal = ('wishlist',)
 
+
 class BidAdmin(admin.ModelAdmin):
     list_display = ('user', 'auction_listing', 'price', 'date')
 

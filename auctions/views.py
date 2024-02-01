@@ -71,7 +71,7 @@ def register(request):
 @login_required(login_url='login')
 def create_listing(request):
     categories = ListingCategory.objects.all()
-    
+
     if request.method == "POST":
         name = request.POST['name']
         description = request.POST['description']
@@ -85,7 +85,7 @@ def create_listing(request):
                 'message': 'Name and starting bid are required.',
                 'categories': categories,
             })
-        
+
         try:
             listing = AuctionListing.objects.create(
                 name=name,
@@ -119,4 +119,20 @@ def show_listing(request, listing_id):
 
     return render(request, 'auctions/listing.html', {
         'listing': listing,
+    })
+
+
+def show_category(request, category_id: int):
+    try:
+        category=ListingCategory.objects.get(pk=category_id)
+        listing_list = category.listings.all()
+
+    except ListingCategory.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Category does not exist.',
+        })
+
+    return render(request, 'auctions/category.html', {
+        'category': category,
+        'listings': listing_list,
     })

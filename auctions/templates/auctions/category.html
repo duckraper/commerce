@@ -1,5 +1,7 @@
 {% extends "auctions/layout.html" %}
 
+{% block title %}Category {{category.name}}{% endblock title %}
+
 {% block body %}
     <h2>{{category.name}}</h2>
     <ul class='listing-categories'>

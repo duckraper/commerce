@@ -1,5 +1,7 @@
 {% extends "auctions/layout.html" %}
 
+{% block title %}{{listing.name}}{% endblock title %}
+
 {% block body %}
     <div class='listing'>
         <!-- Detalles sobre el listing, imagen y tal, con flex in row -->
@@ -9,23 +11,57 @@
                 <img src="{{listing.image}}" alt="{{listing.name}}"/></a>
             </div>
             <div class='listing-details'>
+                {% if user.is_authenticated %}
+                    {% if user == listing.made_by %}
+                        {% if listing.opened %}
+                            <div class="alert alert-success" role="alert">Opened</div>
+                        {% else %}
+                            <div class="alert alert-danger">Closed</div>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}    
                 <h3>{{listing.name}}</h3>
                 <p id='price'>$ {{listing.current_price}}</p>
                 <a href="{% url 'category' category_id=listing.category.pk %}">See more in {{listing.category}}</a>
                 <p id='date'>Created {{listing.date}}</p>
+                
                 <div id="item-description">
                     <h4>Description</h4>
-                    <p>{{listing.description}}</p>
+                    {% if listing.description %}
+                        <p>{{listing.description}}</p>
+                    {% else %}
+                        <p>No description provided.</p>
+                    {% endif %}
                 </div>
-                <!-- Edit Menu for user self listings -->
+
+                <!-- formulario para bids -->
                 {% if user.is_authenticated %}
-                    <div class='user-listing-manage'>
-                        <input class="btn btn-primary" type="submit" value="Place Bid"/>
-                    </div>
+                    <form class='user-listing-manage' method="post">
+                        {% csrf_token %}
+                        {% if user == listing.made_by %}
+                            <!-- si el usuario es el que hizo el listing -->
+                            <a href="{% url 'edit' listing_id=listing.pk %}">
+                                <button type="button" class="btn btn-primary">Edit</button>
+                            </a>
+                            {% comment %} <button type="button" class="btn btn-success" href="{% url 'close' listing_id=listing.pk %}"">Close Bid</button> {% endcomment %}
+                            <a href="{% url 'delete' listing_id=listing.pk %}">
+                                <button type="button" class="btn btn-danger" >Delete</button>
+                            </a>
+                        <!-- TODO implementar lo respectivo de la watchlist-->
+                        {% else %}
+                            <div class="input-group mb-3">
+                                <input class="form-control" type="number" name="bid" step="0.01" min="{{listing.current_price}}" placeholder="{{listing.current_price}}"/>
+                                <div class="input-group-append">
+                                    <button class="btn btn-primary" type="submit" value="Place Bid">Place Bid</button>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </form>
                 {% endif %}
             </div>
         </div>
-        <!-- Commentarios -->
+        <!-- TODO hacer todo de comentarios -->
+        <!-- Commentarios  -->
         <div class="comments-section">
             {% for comment in comments %}
                 <div class="comment">

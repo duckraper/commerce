@@ -96,15 +96,15 @@ def create_listing(request):
             })
 
         try:
+            _category=ListingCategory.objects.get(name=category_name)
             listing = AuctionListing.objects.create(
                 name=name,
                 description=description,
                 image=image,
-                category=ListingCategory.objects.get(name=category_name),
+                category=_category,
                 current_price=price,
-                made_by = request.user
+                made_by=request.user
             )
-            # listing.made_by[request.user]  # Utilizar el método set() en lugar de asignación directa
             listing.save()
             return HttpResponseRedirect(reverse('index'))
         except ListingCategory.DoesNotExist:
@@ -112,12 +112,6 @@ def create_listing(request):
                 'message': 'Category does not exist.',
                 'categories': categories,
             })
-        except IntegrityError:
-            return render(request, 'auctions/create.html', {
-                'message': 'Name already taken.',
-                'categories': categories,
-            })
-
 
     return render(request, 'auctions/create.html', {
         'categories': categories,
@@ -137,6 +131,52 @@ def delete_listing(request, listing_id):
     return HttpResponseRedirect(reverse('index'))
 
 
+@login_required(login_url='login')
+def edit_listing(request, listing_id):
+    categories = ListingCategory.objects.all()
+
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
+
+    if request.method == "POST":
+        name = request.POST['name']
+        description = request.POST['description']
+        image = request.POST['image']
+        category_name = request.POST['category']
+        price = request.POST['starting-bid']
+
+        if not (name and image and category_name and price):
+            return render(request, 'auctions/create.html', {
+                'message': 'Make sure of filling at least the fields: name, image, category, and starting bid properly.',
+                'categories': categories,
+            })
+
+        try:
+            _category = ListingCategory.objects.get(name=category_name)
+            listing.name = name
+            listing.description = description
+            listing.image = image
+            listing.category = _category
+            listing.current_price = price
+            listing.save()
+            return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
+        
+        except ListingCategory.DoesNotExist:
+            return render(request, 'auctions/create.html', {
+                'message': 'Category does not exist.',
+                'categories': categories,
+            })
+
+    return render(request, 'auctions/edit.html', {
+        'listing': listing,
+        'categories': categories,
+    })
+
+
 def show_listing(request, listing_id):
     try:
         listing = AuctionListing.objects.get(pk=listing_id)
@@ -151,10 +191,12 @@ def show_listing(request, listing_id):
     })
 
 # TODO terminar la vista de categorias
+
+
 def show_category(request, category_id: int):
     try:
         category = ListingCategory.objects.get(pk=category_id)
-        listing_list = category.listings.all() # type: ignore
+        listing_list = category.listings.all()  # type: ignore
 
     except ListingCategory.DoesNotExist:
         return render(request, 'auctions/error.html', {

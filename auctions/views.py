@@ -102,9 +102,9 @@ def create_listing(request):
                 image=image,
                 category=ListingCategory.objects.get(name=category_name),
                 current_price=price,
-                
+                made_by = request.user
             )
-            listing.made_by.set([request.user])  # Utilizar el método set() en lugar de asignación directa
+            # listing.made_by[request.user]  # Utilizar el método set() en lugar de asignación directa
             listing.save()
             return HttpResponseRedirect(reverse('index'))
         except ListingCategory.DoesNotExist:

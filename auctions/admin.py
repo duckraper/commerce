@@ -5,8 +5,8 @@ from .models import User, AuctionListing, ListingCategory, Bid, Comment
 
 
 class AuctionListingAdmin(admin.ModelAdmin):
-    list_display = ('name', 'made_by','description', 'image', 'category',
-                    'date', 'current_price', 'opened')
+    list_display = ('name', 'made_by', 'starting_bid', 'current_price', 'description', 'image', 'category',
+                    'date', 'opened')
 
 
 class UserAdmin(admin.ModelAdmin):

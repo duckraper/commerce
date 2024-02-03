@@ -54,16 +54,14 @@ def register(request):
     if request.method == "POST":
         username = request.POST["username"]
         email = request.POST["email"]
-
-        # Ensure password matches confirmation
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
+        
         if password != confirmation:
             return render(request, "auctions/register.html", {
                 "message": "Passwords must match."
             })
 
-        # Attempt to create new user
         try:
             user = User.objects.create_user(  # type: ignore
                 username, email, password)
@@ -96,13 +94,13 @@ def create_listing(request):
             })
 
         try:
-            _category=ListingCategory.objects.get(name=category_name)
+            _category = ListingCategory.objects.get(name=category_name)
             listing = AuctionListing.objects.create(
                 name=name,
                 description=description,
                 image=image,
                 category=_category,
-                current_price=price,
+                starting_bid=price,
                 made_by=request.user
             )
             listing.save()
@@ -164,7 +162,7 @@ def edit_listing(request, listing_id):
             listing.current_price = price
             listing.save()
             return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
-        
+
         except ListingCategory.DoesNotExist:
             return render(request, 'auctions/create.html', {
                 'message': 'Category does not exist.',
@@ -185,13 +183,34 @@ def show_listing(request, listing_id):
             'message': 'Listing does not exist.',
         })
 
+    # si se hizo algun bid
+    if request.method == "POST":
+        bid = float(request.POST['bid'])
+
+        if bid <= listing.current_price:
+            return render(request, 'auctions/listing.html', {
+                'message': 'Price must be greater than the current price.',
+            })
+
+        listing.current_price = bid  # type: ignore
+        listing.save()
+        return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
+
     return render(request, 'auctions/listing.html', {
         'listing': listing,
-        'user_authenticated': request.user.is_authenticated,
     })
 
-# TODO terminar la vista de categorias
 
+def show_categories(request):
+    return render(request, 'auctions/categories.html', {
+        'categories': ListingCategory.objects.all(),
+    })
+
+
+def show_my_bids(request):
+    return render(request, 'auctions/my_bids.html', {
+        'bids': request.user.bids.all(),
+    })
 
 def show_category(request, category_id: int):
     try:
@@ -221,6 +240,27 @@ def show_my_listings(request):
     return render(request, 'auctions/my_listings.html', {
         'listings': request.user.listings_made.all(),
     })
+
+
+def bid(request, listing_id):
+    if request.method == "POST":
+        try:
+            listing = AuctionListing.objects.get(pk=listing_id)
+        except AuctionListing.DoesNotExist:
+            return render(request, 'auctions/error.html', {
+                'message': 'Listing does not exist.',
+            })
+
+        price = request.POST['bid']
+
+        if price <= listing.current_price:
+            return render(request, 'auctions/error.html', {
+                'message': 'Price must be greater than the current price.',
+            })
+
+        listing.current_price = price
+        listing.save()
+        return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
 
 
 # TODO implement comment view

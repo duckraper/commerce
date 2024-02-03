@@ -11,6 +11,9 @@
                 <img src="{{listing.image}}" alt="{{listing.name}}"/></a>
             </div>
             <div class='listing-details'>
+                {% if message %}
+                    <div class="alert alert-danger" role="alert">{{message}}</div>
+                {% endif %}
                 {% if user.is_authenticated %}
                     {% if user == listing.made_by %}
                         {% if listing.opened %}
@@ -19,7 +22,7 @@
                             <div class="alert alert-danger">Closed</div>
                         {% endif %}
                     {% endif %}
-                {% endif %}    
+                {% endif %}
                 <h3>{{listing.name}}</h3>
                 <p id='price'>$ {{listing.current_price}}</p>
                 <a href="{% url 'category' category_id=listing.category.pk %}">See more in {{listing.category}}</a>
@@ -36,7 +39,7 @@
 
                 <!-- formulario para bids -->
                 {% if user.is_authenticated %}
-                    <form class='user-listing-manage' method="post">
+                    <form class='user-listing-manage' action="{% url "listing" listing_id=listing.pk %}" method="post">
                         {% csrf_token %}
                         {% if user == listing.made_by %}
                             <!-- si el usuario es el que hizo el listing -->

@@ -10,7 +10,9 @@ urlpatterns = [
     path("create", views.create_listing, name="create"),
     path("watchlist", views.show_watchlist, name="watchlist"),
     path("my_listings", views.show_my_listings, name="my_listings"),
-    # TODO terminar bid, close, y edit
+    path("categories", views.show_categories, name="categories"),
+    path("my_bids", views.show_my_bids, name="my_bids"),
+    # TODO terminar bid, close
     # path("bid/<int:listing_id>", views.bid, name="bid"),
     # path("close/<int:listing_id>", views.close, name="close"),
     path("edit/<int:listing_id>", views.edit_listing, name="edit"),

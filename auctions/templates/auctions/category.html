@@ -1,14 +1,31 @@
 {% extends "auctions/layout.html" %}
 
-{% block title %}Category {{category.name}}{% endblock title %}
+{% block title %}{{category.name}}{% endblock title %}
 
 {% block body %}
     <h2>{{category.name}}</h2>
-    <ul class='listing-categories'>
+    <div class='active-listings'>
+        {% if category.listings.count == 0 %}
+            <p>No listings in this category</p>
+        {% endif %}
         {% for listing in listings %}
-            <li>
-                <a href="{% url 'listing' listing.id %}">{{listing.name}}</a>
-            </li>
+            {% if listing in watchlist %}
+                <div class='watchlist-listing-item'>
+            {% else %}
+                <div class='listing-item'>
+            {% endif %}
+                    <img src='{{listing.image}}' alt='{{listing.name}}' class='listing-image'/>
+                    <div class='listing-details'>
+                        <a href="{% url 'listing' listing_id=listing.pk %}">
+                            <h5>{{listing.name}}</h5>
+                        </a>
+                        <p>Price: ${{listing.current_price}}</p>
+                        <a href="{% url 'category' category_id=listing.category.pk %}">
+                            <p id='listing-category'>{{listing.category}}</p>
+                        </a>
+                        <small id='date'>Created {{listing.date}}</small>
+                    </div>
+                </div>
         {% endfor %}
-    </ul>
+    </div>
 {% endblock body %}

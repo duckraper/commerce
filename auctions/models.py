@@ -48,9 +48,17 @@ class Bid(models.Model):
         AuctionListing, on_delete=models.CASCADE, related_name='bids')
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     date = models.DateTimeField(default=datetime.now)
+    BID_STATE = [
+        ('W', 'Winning'), # va ganando la subasta
+        ('O', 'Outbid'), # fue superado
+        ('L', 'Lost'), # perdio la subasta
+        ('F', 'Final'), # gano la subasta
+    ]
+    state = models.CharField(
+        max_length=1, choices=BID_STATE, default='W')
 
     def __str__(self):
-        return f"{self.user.username}: ${self.price} ({self.date})"
+        return f"{self.user.username}: ${self.price}, on {self.date} ({self.state})"
 
 
 class Comment(models.Model):

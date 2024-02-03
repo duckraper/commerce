@@ -4,9 +4,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import AuctionListing, ListingCategory
-
-from .models import User
+from .models import *
 
 
 def index(request):
@@ -56,7 +54,7 @@ def register(request):
         email = request.POST["email"]
         password = request.POST["password"]
         confirmation = request.POST["confirmation"]
-        
+
         if password != confirmation:
             return render(request, "auctions/register.html", {
                 "message": "Passwords must match."
@@ -183,19 +181,6 @@ def show_listing(request, listing_id):
             'message': 'Listing does not exist.',
         })
 
-    # si se hizo algun bid
-    if request.method == "POST":
-        bid = float(request.POST['bid'])
-
-        if bid <= listing.current_price:
-            return render(request, 'auctions/listing.html', {
-                'message': 'Price must be greater than the current price.',
-            })
-
-        listing.current_price = bid  # type: ignore
-        listing.save()
-        return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
-
     return render(request, 'auctions/listing.html', {
         'listing': listing,
     })
@@ -207,10 +192,12 @@ def show_categories(request):
     })
 
 
+# TODO terminar de implementar vista de las subastas en las que ha participado el usuario
 def show_my_bids(request):
     return render(request, 'auctions/my_bids.html', {
         'bids': request.user.bids.all(),
     })
+
 
 def show_category(request, category_id: int):
     try:
@@ -242,30 +229,74 @@ def show_my_listings(request):
     })
 
 
+# TODO implementar vista de las subastas de un producto
+def show_listing_bids(request, listing_id):
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
+
+    return render(request, 'auctions/bids.html', {
+        'bids': listing.bids.all(),
+    })
+
+
 def bid(request, listing_id):
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
+
     if request.method == "POST":
-        try:
-            listing = AuctionListing.objects.get(pk=listing_id)
-        except AuctionListing.DoesNotExist:
-            return render(request, 'auctions/error.html', {
-                'message': 'Listing does not exist.',
-            })
+        bid_price = float(request.POST['bid'])
+        user = request.user
 
-        price = request.POST['bid']
+        bid = Bid.objects.create(
+            user=request.user,
+            auction_listing=listing,
+            price=bid_price,
+        )
 
-        if price <= listing.current_price:
-            return render(request, 'auctions/error.html', {
+        if bid_price <= listing.current_price:  # type: ignore
+            return render(request, 'auctions/listing.html', {
                 'message': 'Price must be greater than the current price.',
             })
 
-        listing.current_price = price
+        listing.current_price = bid_price  # type: ignore
         listing.save()
         return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
+
+    return render(request, 'auctions/listing.html', {
+        'listing': listing,
+    })
+
+# TODO Revisar bugs
+def close(request, listing_id):
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
+    highest_bid = listing.bids.all().order_by('-price').first()  # type: ignore
+    user = highest_bid.user
+
+    highest_bid.state = 'F'  # ganador
+    listing.bids.all().exclude(pk=highest_bid.pk).update(state='L')  # perdedores
+
+    listing.opened = False
+    listing.save()
+    return HttpResponseRedirect(reverse('index'))
 
 
 # TODO implement comment view
 @login_required(login_url='login')
 def comment(request, listing_id):
+
     return redirect(request, 'auctions/comment.html', {
         'listing': AuctionListing.objects.get(pk=listing_id),
     })

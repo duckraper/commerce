@@ -21,14 +21,16 @@ class AuctionListing(models.Model):
     current_price = models.DecimalField(
         max_digits=10, decimal_places=2, null=False)
     opened = models.BooleanField(default=True)
+    made_by = models.ForeignKey(
+        'User', on_delete=models.PROTECT, related_name='listings_made', null=True)
 
     def __str__(self):
         return f"{self.name}: ${self.current_price}"
 
 
 class User(AbstractUser):
-    wishlist = models.ManyToManyField(AuctionListing)
-
+    watchlist = models.ManyToManyField(AuctionListing)
+ 
     def __str__(self):
         return f"{self.username}"
 

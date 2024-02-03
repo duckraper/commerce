@@ -1,14 +1,13 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>Watchlist</h2>
     <div class='active-listings'>
-        {% for listing in listings %}
-            {% if listing in watchlist %}
+        {% if watchlist|length == 0 %}
+            <p>You have no items in your watchlist.</p>
+        {% else %}
+            {% for listing in watchlist %}
                 <div class='watchlist-listing-item'>
-            {% else %}
-                <div class='listing-item'>
-            {% endif %}
                     <img src='{{listing.image}}' alt='{{listing.name}}' class='listing-image'/>
                     <div class='listing-details'>
                         <a href="{% url 'listing' listing_id=listing.pk %}">
@@ -21,6 +20,7 @@
                         <small id='date'>Created {{listing.date}}</small>
                     </div>
                 </div>
-        {% endfor %}
+            {% endfor %}
+        {% endif %}
     </div>
 {% endblock %}

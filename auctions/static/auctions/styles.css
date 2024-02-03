@@ -5,15 +5,11 @@
 }
 
 body {
-    background-color: #e5e5e56d;
-    padding: 10px;
+    background-color: hsla(0, 0%, 90%, 0.427);
+    padding: 2em 5em 1em 5em;
 }
 
-hr {
-    margin: 1em 0;
-}
-
-.active-listings-section {
+.active-section {
     display: flex;
     flex-direction: column;
     padding: 1em;
@@ -24,6 +20,7 @@ hr {
     display: flex;
     flex-wrap: wrap;
     gap: 1em;
+    margin-bottom: 1em;
 }
 
 .listing-item {
@@ -37,8 +34,29 @@ hr {
     font-size: larger;
 }
 
+.watchlist-listing-item {
+    background-color: #f6f0c4;
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    width: 236px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    transition-duration: 300ms;
+    font-size: larger;
+    
+}
+
+.watchlist-listing-item:hover {
+    background-image: linear-gradient(#ece6bb, #fffacd);
+    box-shadow: 0 10px 15px 0px #00000033;
+    transition-duration: 200ms;
+}
+
+
+
 .listing-item:hover {
-    background-image: linear-gradient(#e5e5e546, #ffffff);
+    background-image: linear-gradient(#dbdbdb63, #ffffff);
     box-shadow: 0 10px 15px 0px #00000033;
     transition-duration: 200ms;
 }
@@ -67,6 +85,11 @@ hr {
     color: black;
 }
 
+.listing-details a:hover{
+    text-decoration: underline;
+    text-decoration-style: dotted;
+}
+
 .listing-details a h5 {
     overflow: hidden;
     white-space: nowrap;
@@ -85,6 +108,36 @@ hr {
     font-size: 14px;
 }
 
+.item-section {
+    display: flex;
+    gap: 1em;
+}
+
+.item-section div img{
+    width: 30em;
+    height: auto;
+    border-radius: 0.1em;
+    margin-bottom: 1em;
+    object-fit: cover;
+}
+
+.user-listing-manage {
+    display: flex;
+    gap: 1em;
+}
+
+.comments-section{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.comment {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+}
+
 #listing-category {
     color: rgb(101, 101, 101);
     font-size: 12px;
@@ -98,4 +151,13 @@ hr {
 #date {
     color: rgb(101, 101, 101);
     font-size: 12px;
+}
+
+#price {
+    font-size: 30px;
+}
+
+#item-description {
+    margin-top: 1em;
+    margin-bottom: 1em;
 }

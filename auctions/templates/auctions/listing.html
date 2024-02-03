@@ -1,12 +1,38 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <div class='item-section'>
-        <div class='item-image'>
-            <img src="{{listing.image}}" alt="{{listing.name}}"/>
+    <div class='listing'>
+        <!-- Detalles sobre el listing, imagen y tal, con flex in row -->
+        <div class='item-section'>
+            <div>
+                <a href="{{listing.image}}">
+                <img src="{{listing.image}}" alt="{{listing.name}}"/></a>
+            </div>
+            <div class='listing-details'>
+                <h3>{{listing.name}}</h3>
+                <p id='price'>$ {{listing.current_price}}</p>
+                <a href="{% url 'category' category_id=listing.category.pk %}">See more in {{listing.category}}</a>
+                <p id='date'>Created {{listing.date}}</p>
+                <div id="item-description">
+                    <h4>Description</h4>
+                    <p>{{listing.description}}</p>
+                </div>
+                <!-- Edit Menu for user self listings -->
+                {% if user.is_authenticated %}
+                    <div class='user-listing-manage'>
+                        <input class="btn btn-primary" type="submit" value="Place Bid"/>
+                    </div>
+                {% endif %}
+            </div>
         </div>
-        <div class='item-related'>
-            <h3>{{listing.name}}</h3>
+        <!-- Commentarios -->
+        <div class="comments-section">
+            {% for comment in comments %}
+                <div class="comment">
+                    <p>{{ comment.user }} said:</p>
+                    <p>{{ comment.content }}</p>
+                </div>
+            {% endfor %}
             
         </div>
     </div>

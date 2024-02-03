@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import AuctionListing, ListingCategory
@@ -10,8 +10,18 @@ from .models import User
 
 
 def index(request):
+    auction_listing = AuctionListing.objects.all().filter(opened=True)
+    if request.user.is_authenticated:
+        user_watchlist = [
+            listing for listing in auction_listing if listing in request.user.watchlist.all()]
+        print(user_watchlist)
+        return render(request, 'auctions/index.html', {
+            'listings': auction_listing,
+            'watchlist': user_watchlist,
+        })
+
     return render(request, "auctions/index.html", {
-        'listings': AuctionListing.objects.all().filter(opened=True),
+        'listings': auction_listing,
     })
 
 
@@ -76,13 +86,12 @@ def create_listing(request):
         name = request.POST['name']
         description = request.POST['description']
         image = request.POST['image']
-        category = ListingCategory.objects.get(name=request.POST['category'])
+        category_name = request.POST['category']
         price = request.POST['starting-bid']
 
-        if not name or not image or not category or not price:
+        if not (name and image and category_name and price):
             return render(request, 'auctions/create.html', {
-                'required_fields': True,
-                'message': 'Name and starting bid are required.',
+                'message': 'Make sure of filling at least the fields: name, image, category, and starting bid properly.',
                 'categories': categories,
             })
 
@@ -91,22 +100,41 @@ def create_listing(request):
                 name=name,
                 description=description,
                 image=image,
-                category=category,
+                category=ListingCategory.objects.get(name=category_name),
                 current_price=price,
+                
             )
+            listing.made_by.set([request.user])  # Utilizar el método set() en lugar de asignación directa
             listing.save()
             return HttpResponseRedirect(reverse('index'))
+        except ListingCategory.DoesNotExist:
+            return render(request, 'auctions/create.html', {
+                'message': 'Category does not exist.',
+                'categories': categories,
+            })
         except IntegrityError:
             return render(request, 'auctions/create.html', {
-                'required_fields': False,
-                'message': 'Name already taken,',
+                'message': 'Name already taken.',
                 'categories': categories,
             })
 
+
     return render(request, 'auctions/create.html', {
-        'required_fields': False,
         'categories': categories,
     })
+
+
+@login_required(login_url='login')
+def delete_listing(request, listing_id):
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
+
+    listing.delete()
+    return HttpResponseRedirect(reverse('index'))
 
 
 def show_listing(request, listing_id):
@@ -119,13 +147,14 @@ def show_listing(request, listing_id):
 
     return render(request, 'auctions/listing.html', {
         'listing': listing,
+        'user_authenticated': request.user.is_authenticated,
     })
 
-
+# TODO terminar la vista de categorias
 def show_category(request, category_id: int):
     try:
-        category=ListingCategory.objects.get(pk=category_id)
-        listing_list = category.listings.all()
+        category = ListingCategory.objects.get(pk=category_id)
+        listing_list = category.listings.all() # type: ignore
 
     except ListingCategory.DoesNotExist:
         return render(request, 'auctions/error.html', {
@@ -135,4 +164,26 @@ def show_category(request, category_id: int):
     return render(request, 'auctions/category.html', {
         'category': category,
         'listings': listing_list,
+    })
+
+
+@login_required(login_url='login')
+def show_watchlist(request):
+    return render(request, 'auctions/watchlist.html', {
+        'watchlist': request.user.watchlist.all(),
+    })
+
+
+@login_required(login_url='login')
+def show_my_listings(request):
+    return render(request, 'auctions/my_listings.html', {
+        'listings': request.user.listings_made.all(),
+    })
+
+
+# TODO implement comment view
+@login_required(login_url='login')
+def comment(request, listing_id):
+    return redirect(request, 'auctions/comment.html', {
+        'listing': AuctionListing.objects.get(pk=listing_id),
     })

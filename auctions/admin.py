@@ -5,12 +5,13 @@ from .models import User, AuctionListing, ListingCategory, Bid, Comment
 
 
 class AuctionListingAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'image', 'category',
+    list_display = ('name', 'made_by','description', 'image', 'category',
                     'date', 'current_price', 'opened')
 
 
 class UserAdmin(admin.ModelAdmin):
-    filter_horizontal = ('wishlist',)
+    list_display = ('username', 'email')
+    filter_horizontal = ('watchlist',)
 
 
 class BidAdmin(admin.ModelAdmin):

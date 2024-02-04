@@ -6,8 +6,6 @@
     <h2>{{category.name}}</h2>
     <div class='active-listings'>
         {% if category.listings.count == 0 %}
-        {% comment %} si hubo al menos una subasta cerrada
-        igual se contara y no mostrara el mensaje de categoria vacia {% endcomment %}
             <p>No listings in this category</p>
         {% endif %}
         {% for listing in listings %}

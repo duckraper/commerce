@@ -45,7 +45,7 @@ class Bid(models.Model):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='bids')
     auction_listing = models.ForeignKey(
-        AuctionListing, on_delete=models.CASCADE, related_name='bids')
+        AuctionListing, on_delete=models.SET_NULL, related_name='bids', null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     date = models.DateTimeField(default=datetime.now)
     BID_STATE = [

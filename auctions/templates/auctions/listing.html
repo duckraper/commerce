@@ -43,7 +43,17 @@
                         {% endif %}
                     {% endif %}
                 </h3>
-                <p id='price'>$ {{listing.current_price}}</p>
+                
+                {% comment %} si el precio actual difiere del inicial mostrar el inicial {% endcomment %}
+                {% if listing.current_price != listing.starting_bid %}
+                    <p id='starting-bid'>$ {{listing.starting_bid}}</p>
+                    {% comment %} si la puja anterior difiere de la inicial la muestra {% endcomment %}
+                    {% if listing.starting_bid != listing.earliest_bid %}
+                        <p id='earliest-bid'>$ {{listing.earliest_bid}}</p>
+                    {% endif %}
+                {% endif %}
+                <p id="current-price">$ {{listing.current_price}}</p>
+
                 <a href="{% url 'category' category_id=listing.category.pk %}">See more in {{listing.category}}</a>
                 <p id='date'>Created {{listing.date}}</p>
                 
@@ -75,9 +85,9 @@
                             </a>
                         {% else %}
                             <div class="input-group mb-3">
-                                <input class="form-control" type="number" name="bid" step="0.01" min="{{listing.current_price}}" placeholder="{{listing.current_price}}"/>
+                                <input class="form-control" type="number" name="bid" step="0.01" min="{{listing.current_price}}" placeholder="{{listing.current_price}}" {% if user == last_bidder %}readonly disabled{% endif %}/>
                                 <div class="input-group-append">
-                                    <button class="btn btn-primary" type="submit" value="Place Bid">Place Bid</button>
+                                    <button class="btn btn-primary" type="submit" value="Place Bid" {% if user == last_bidder %}disabled{% endif %}>Place Bid</button>
                                 </div>        
                             </div>
                         {% endif %}

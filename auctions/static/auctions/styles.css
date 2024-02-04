@@ -170,8 +170,34 @@ body {
     font-size: 12px;
 }
 
-#price {
+#current-price {
     font-size: 30px;
+}
+
+#earliest-bid {
+    border-collapse: collapse;
+    color: #3f3f3f99;
+    display: inline;
+    font-size: 20px;
+    font-weight: 300;
+    height: auto;
+    letter-spacing: normal;
+    line-height: 0.8em;
+    text-decoration-line: line-through;
+    text-size-adjust: 100%;
+}
+
+#starting-bid {
+    border-collapse: collapse;
+    color: #3f3f3f99;
+    display: inline;
+    font-size: 16px;
+    font-weight: 300;
+    height: auto;
+    letter-spacing: normal;
+    line-height: 0.8em;
+    text-decoration-line: line-through;
+    text-size-adjust: 100%;
 }
 
 #item-description {

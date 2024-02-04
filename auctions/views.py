@@ -180,10 +180,11 @@ def show_listing(request, listing_id):
         return render(request, 'auctions/error.html', {
             'message': 'Listing does not exist.',
         })
-    
+
     return render(request, 'auctions/listing.html', {
         'listing': listing,
         'watchlist': request.user.watchlist.all(),
+        'last_bidder': listing.bids.all().order_by('-date').first().user if listing.bids.all().count() > 0 else None,
     })
 
 
@@ -193,7 +194,6 @@ def show_categories(request):
     })
 
 
-# TODO terminar de implementar vista de las subastas en las que ha participado el usuario
 def show_my_bids(request):
     return render(request, 'auctions/my_bids.html', {
         'bids': request.user.bids.all(),
@@ -213,6 +213,7 @@ def show_category(request, category_id: int):
     return render(request, 'auctions/category.html', {
         'category': category,
         'listings': listing_list,
+        'watchlist': request.user.watchlist.all(),
     })
 
 
@@ -235,6 +236,7 @@ def add_watchlist(request, listing_id):
 
     return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
 
+
 def remove_watchlist(request, listing_id):
     try:
         listing = AuctionListing.objects.get(pk=listing_id)
@@ -246,7 +248,6 @@ def remove_watchlist(request, listing_id):
     request.user.watchlist.remove(listing)
 
     return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
-
 
 
 @login_required(login_url='login')
@@ -292,18 +293,23 @@ def bid(request, listing_id):
             price=bid_price,
         )
         bid.save()
+
         Bid.objects.filter(auction_listing=listing).exclude(
             pk=bid.pk).update(state='O')
+        
         request.user.bids.all().get(pk=bid.pk).state = 'W'
         listing.bids.all().get(pk=bid.pk).state = "W"
-
+        
+        listing.earliest_bid = listing.current_price
         listing.current_price = bid.price
+
         listing.save()
         return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
 
     return render(request, 'auctions/listing.html', {
         'listing': listing,
         'watchlist': request.user.watchlist.all(),
+        'last_bidder': listing.bids.all().order_by('-date').first().user if listing.bids.all().count() > 0 else None,
     })
 
 
@@ -322,10 +328,10 @@ def close(request, listing_id):
     highest_bid.state = 'F'  # ganador
     # user.bids.all().get(pk=highest_bid.pk).state = 'F'
     listing.bids.all().exclude(pk=highest_bid.pk).update(state='L')  # perdedores
-    
+
     listing.opened = False
     highest_bid.save()
-    listing.save()
+    listing.delete()
     return HttpResponseRedirect(reverse('index'))
 
 

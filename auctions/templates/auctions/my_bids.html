@@ -9,7 +9,7 @@
     <ul class='list-group'>
         {% for bid in bids %}
             <li class="list-group-item {% if bid.state == 'W' %}list-group-item-info{% elif bid.state == 'O' %}list-group-item-warning{% elif bid.state == 'L' %}list-group-item-dark{% elif bid.state == 'F' %}list-group-item-success{% endif %}">
-                {{ bid.auction_listing.name }}: ${{ bid.price }}, on {{ bid.date }} ({{ bid.state }})
+                {{ bid.name }}: ${{ bid.price }}, on {{ bid.date }} ({{ bid.state }})
             </li>
         {% endfor %}
     </ul>

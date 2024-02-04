@@ -85,7 +85,7 @@ def create_listing(request):
         category_name = request.POST['category']
         price = request.POST['starting-bid']
 
-        if not (name and image and category_name and price):
+        if not (name and category_name and price):
             return render(request, 'auctions/create.html', {
                 'message': 'Make sure of filling at least the fields: name, image, category, and starting bid properly.',
                 'categories': categories,
@@ -122,6 +122,10 @@ def delete_listing(request, listing_id):
         return render(request, 'auctions/error.html', {
             'message': 'Listing does not exist.',
         })
+
+    # dar como perdidas ('L') todas las pujas asociadas
+    listing.bids.all().update(state='L')
+
 
     listing.delete()
     return HttpResponseRedirect(reverse('index'))

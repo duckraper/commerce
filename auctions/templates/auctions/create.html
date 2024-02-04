@@ -9,7 +9,7 @@
             {{ message }}
         </div>
     {% endif %}
-
+    <!-- TODO falta validacion, lo hare cuando sepa JS -->
     <div class='create-listing'>
         <form action="{% url 'create' %}" method="post">
             {% csrf_token %}

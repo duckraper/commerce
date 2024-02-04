@@ -8,7 +8,8 @@
         <div class='item-section'>
             <div>
                 <a href="{{listing.image}}">
-                <img src="{{listing.image}}" alt="{{listing.name}}"/></a>
+                    <img style="border-radius:0.2em;" src="{{listing.image}}" alt="{{listing.name}}"/>
+                </a>
             </div>
             <div class='listing-details'>
                 {% if message %}
@@ -79,8 +80,9 @@
                                 <a href="{% url 'edit' listing_id=listing.pk %}">
                                     <button type="button" class="btn btn-primary">Edit</button>
                                 </a>
+                                
                                 <a href="{% url 'close' listing_id=listing.pk %}">
-                                    <button type="button" class="btn btn-success" >Close Bid</button>
+                                    <button type="button" class="btn btn-success" {% if listing.bids.count == 0 %}disabled{% endif %}>Close Bid</button>
                                 </a>
                             {% endif %}
                             <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#staticBackdrop">
@@ -129,10 +131,11 @@
                 <p>No comments yet. Be the first to comment!</p>
             {% endif %}
             {% for comment in comments %}
-                <div class="card">
+                <div class="card" style="border-radius: 10px;">
                     <div class="card-body">
                         <blockquote class="blockquote mb-0">
                             {% if user.is_authenticated %}
+                                {% if user == comment.user %}
                                 <a href="{% url 'remove_comment' comment_id=comment.pk %}">
                                     <button type="button" class="btn btn-outline-danger" style="float:right;">
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -141,6 +144,7 @@
                                         </svg>
                                     </button>
                                 </a>
+                                {% endif %}
                                 <p>{{comment.content}}</p>
                                 <footer class="blockquote-footer">@{{ comment.user }} on <cite title="Source Title">{{ comment.date }}</cite></footer>
                             {% endif %}

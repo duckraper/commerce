@@ -180,10 +180,11 @@ def show_listing(request, listing_id):
         return render(request, 'auctions/error.html', {
             'message': 'Listing does not exist.',
         })
-
+    
     return render(request, 'auctions/listing.html', {
         'listing': listing,
-        'watchlist': request.user.watchlist.all(),
+        'watchlist': request.user.watchlist.all() if request.user.is_authenticated else None,
+        'comments': listing.comments.all(),
         'last_bidder': listing.bids.all().order_by('-date').first().user if listing.bids.all().count() > 0 else None,
     })
 
@@ -213,7 +214,7 @@ def show_category(request, category_id: int):
     return render(request, 'auctions/category.html', {
         'category': category,
         'listings': listing_list,
-        'watchlist': request.user.watchlist.all(),
+        'watchlist': request.user.watchlist.all() if request.user.is_authenticated else None,
     })
 
 
@@ -335,10 +336,40 @@ def close(request, listing_id):
     return HttpResponseRedirect(reverse('index'))
 
 
-# TODO implement comment view
 @login_required(login_url='login')
 def comment(request, listing_id):
+    try:
+        listing = AuctionListing.objects.get(pk=listing_id)
+    except AuctionListing.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Listing does not exist.',
+        })
 
-    return redirect(request, 'auctions/comment.html', {
-        'listing': AuctionListing.objects.get(pk=listing_id),
+    if request.method == "POST":
+        content = request.POST['content']
+
+        comment = Comment.objects.create(
+            content=content,
+            auction_listing=listing,
+            user=request.user
+        )
+        comment.save()
+        return HttpResponseRedirect(reverse('listing', args=(listing.pk,)))
+
+    return render(request, 'auctions/listing.html', {
+        'listing': listing,
+        'watchlist': request.user.watchlist.all(),
+        'last_bidder': listing.bids.all().order_by('-date').first().user if listing.bids.all().count() > 0 else None,
     })
+
+
+def remove_comment(request, comment_id):
+    try:
+        comment = Comment.objects.all().get(pk=comment_id)
+    except Comment.DoesNotExist:
+        return render(request, 'auctions/error.html', {
+            'message': 'Comment does not exists.'
+        })
+
+    comment.delete()
+    return HttpResponseRedirect(reverse('listing', args=(comment.auction_listing.pk,)))

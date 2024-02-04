@@ -1,3 +1,4 @@
+from email.policy import default
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from datetime import datetime
@@ -13,7 +14,8 @@ class ListingCategory(models.Model):
 class AuctionListing(models.Model):
     name = models.CharField(max_length=64)  # varchar(64)
     description = models.TextField(null=True)  # Text
-    image = models.URLField(blank=True)  # Url
+    image = models.URLField(blank=True, null=True,
+                            default='https://via.placeholder.com/500')  # Url
     category = models.ForeignKey(
         ListingCategory, on_delete=models.PROTECT, related_name='listings')  # FK references ListingCategory
     date = models.DateTimeField(default=datetime.now)
@@ -80,6 +82,11 @@ class Comment(models.Model):
         User, on_delete=models.CASCADE, related_name='comments')
     auction_listing = models.ForeignKey(
         AuctionListing, on_delete=models.CASCADE, related_name='comments')
+    date = models.DateTimeField(default=datetime.now)
+
+    # TODO implementar sistema de replies
+    reply = models.ForeignKey(
+        'self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
     def __str__(self):
         return f"{self.user.username}: {self.content}"

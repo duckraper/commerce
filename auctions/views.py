@@ -257,7 +257,6 @@ def show_my_listings(request):
     })
 
 
-# TODO implementar vista de las subastas de un producto
 def show_listing_bids(request, listing_id):
     try:
         listing = AuctionListing.objects.get(pk=listing_id)
@@ -266,7 +265,8 @@ def show_listing_bids(request, listing_id):
             'message': 'Listing does not exist.',
         })
 
-    return render(request, 'auctions/bids.html', {
+    return render(request, 'auctions/listing_bids.html', {
+        'listing': listing,
         'bids': listing.bids.all(),
     })
 
@@ -296,10 +296,10 @@ def bid(request, listing_id):
 
         Bid.objects.filter(auction_listing=listing).exclude(
             pk=bid.pk).update(state='O')
-        
+
         request.user.bids.all().get(pk=bid.pk).state = 'W'
         listing.bids.all().get(pk=bid.pk).state = "W"
-        
+
         listing.earliest_bid = listing.current_price
         listing.current_price = bid.price
 

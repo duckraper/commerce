@@ -1,0 +1,16 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+    Bids
+{% endblock title%}
+
+{% block body %}
+    <h2>Bids for "{{listing.name}}"</h2>
+    <ul class='list-group'>
+        {% for bid in bids %}
+            <li class="list-group-item {% if bid.state == 'W' %}list-group-item-info{% elif bid.state == 'O' %}list-group-item-warning{% elif bid.state == 'L' %}list-group-item-dark{% elif bid.state == 'F' %}list-group-item-success{% endif %}">
+                {{ bid.user.username }}: ${{ bid.price }}, on {{ bid.date }} ({{ bid.state }})
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock body %}

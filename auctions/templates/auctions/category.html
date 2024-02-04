@@ -6,26 +6,32 @@
     <h2>{{category.name}}</h2>
     <div class='active-listings'>
         {% if category.listings.count == 0 %}
+        {% comment %} si hubo al menos una subasta cerrada
+        igual se contara y no mostrara el mensaje de categoria vacia {% endcomment %}
             <p>No listings in this category</p>
         {% endif %}
         {% for listing in listings %}
-            {% if listing in watchlist %}
-                <div class='watchlist-listing-item'>
-            {% else %}
-                <div class='listing-item'>
-            {% endif %}
-                    <img src='{{listing.image}}' alt='{{listing.name}}' class='listing-image'/>
-                    <div class='listing-details'>
-                        <a href="{% url 'listing' listing_id=listing.pk %}">
-                            <h5>{{listing.name}}</h5>
-                        </a>
-                        <p>Price: ${{listing.current_price}}</p>
-                        <a href="{% url 'category' category_id=listing.category.pk %}">
-                            <p id='listing-category'>{{listing.category}}</p>
-                        </a>
-                        <small id='date'>Created {{listing.date}}</small>
+            {% if listing.opened %}
+                {% if listing in watchlist %}
+                    <div class='watchlist-listing-item'>
+                {% elif user == listing.made_by %}
+                    <div class='own-listing-item'>
+                {% else %}
+                    <div class='listing-item'>
+                {% endif %}
+                        <img src='{{listing.image}}' alt='{{listing.name}}' class='listing-image'/>
+                        <div class='listing-details'>
+                            <a href="{% url 'listing' listing_id=listing.pk %}">
+                                <h5>{{listing.name}}</h5>
+                            </a>
+                            <p>Price: ${{listing.current_price}}</p>
+                            <a href="{% url 'category' category_id=listing.category.pk %}">
+                                <p id='listing-category'>{{listing.category}}</p>
+                            </a>
+                            <small id='date'>Created {{listing.date}}</small>
+                        </div>
                     </div>
-                </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% endblock body %}

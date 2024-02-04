@@ -53,6 +53,23 @@ body {
     transition-duration: 200ms;
 }
 
+.own-listing-item {
+    background-color: #c4ccf6;
+    display: flex;
+    flex-direction: column;
+    padding: 1em;
+    width: 236px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 2px;
+    transition-duration: 300ms;
+    font-size: larger;
+}
+
+.own-listing-item:hover {
+    background-image: linear-gradient(#adb2db, #cfd6fc);
+    box-shadow: 0 10px 15px 0px #00000033;
+    transition-duration: 200ms;
+}
 
 
 .listing-item:hover {

@@ -23,7 +23,26 @@
                         {% endif %}
                     {% endif %}
                 {% endif %}
-                <h3>{{listing.name}}</h3>
+                <h3>
+                    {{listing.name}}
+                    {% if user.is_authenticated %}
+                        {% if user != listing.made_by %}
+                            {% if listing not in watchlist %}
+                                <a href="{% url 'add_watchlist' listing_id=listing.pk %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark" viewBox="0 0 16 16">
+                                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1z"/>
+                                    </svg>
+                                </a>
+                            {% else %}
+                                <a href="{% url 'remove_watchlist' listing_id=listing.pk %}">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bookmark-x-fill" viewBox="0 0 16 16">
+                                        <path fill-rule="evenodd" d="M2 15.5V2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.74.439L8 13.069l-5.26 2.87A.5.5 0 0 1 2 15.5M6.854 5.146a.5.5 0 1 0-.708.708L7.293 7 6.146 8.146a.5.5 0 1 0 .708.708L8 7.707l1.146 1.147a.5.5 0 1 0 .708-.708L8.707 7l1.147-1.146a.5.5 0 0 0-.708-.708L8 6.293z"/>
+                                    </svg>
+                                </a>
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </h3>
                 <p id='price'>$ {{listing.current_price}}</p>
                 <a href="{% url 'category' category_id=listing.category.pk %}">See more in {{listing.category}}</a>
                 <p id='date'>Created {{listing.date}}</p>
@@ -43,20 +62,23 @@
                         {% csrf_token %}
                         {% if user == listing.made_by %}
                             <!-- si el usuario es el que hizo el listing -->
-                            <a href="{% url 'edit' listing_id=listing.pk %}">
-                                <button type="button" class="btn btn-primary">Edit</button>
-                            </a>
-                            {% comment %} <button type="button" class="btn btn-success" href="{% url 'close' listing_id=listing.pk %}"">Close Bid</button> {% endcomment %}
+                            {% if listing.opened %}
+                                <a href="{% url 'edit' listing_id=listing.pk %}">
+                                    <button type="button" class="btn btn-primary">Edit</button>
+                                </a>
+                                <a href="{% url 'close' listing_id=listing.pk %}">
+                                    <button type="button" class="btn btn-success" >Close Bid</button>
+                                </a>
+                            {% endif %}
                             <a href="{% url 'delete' listing_id=listing.pk %}">
                                 <button type="button" class="btn btn-danger" >Delete</button>
                             </a>
-                        <!-- TODO implementar lo respectivo de la watchlist-->
                         {% else %}
                             <div class="input-group mb-3">
                                 <input class="form-control" type="number" name="bid" step="0.01" min="{{listing.current_price}}" placeholder="{{listing.current_price}}"/>
                                 <div class="input-group-append">
                                     <button class="btn btn-primary" type="submit" value="Place Bid">Place Bid</button>
-                                </div>
+                                </div>        
                             </div>
                         {% endif %}
                     </form>

@@ -12,9 +12,13 @@
                 <a class="list-group-item list-group-item-action disabled" aria-current="true" href="{% url 'category' category.id %}">
             {% endif %}
                     {{ category.name }}
-                    <span class="badge badge-primary badge-pill">
+                    {% comment %} <span class="badge badge-primary badge-pill">
                         {{ category.listings.count }}
-                    </span>
+                    </span> {% endcomment %}
+                    {% comment %} No es posible implementar
+                    el conteo de listings por categoria
+                    debido a que no hay forma de operar dentro de un formulario :(
+                    TODO cuando aprenda React, implementarlo xd {% endcomment %}
                 </a>
         {% endfor %}
     </div> 

@@ -9,7 +9,7 @@
             <p>You have no items in your listings.</p>
         {% else %}
             {% for listing in listings %}
-                <div class='listing-item'>
+                <div class='own-listing-item'>
                     <img src='{{listing.image}}' alt='{{listing.name}}' class='listing-image'/>
                     <div class='listing-details'>
                         <a href="{% url 'listing' listing_id=listing.pk %}">
